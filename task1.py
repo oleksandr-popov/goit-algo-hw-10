@@ -1,50 +1,53 @@
 import pulp
 
-# 1. Create the Linear Programming problem object
-# We define the problem name and set the goal to be maximization (pulp.LpMaximize).
-production_model = pulp.LpProblem("Beverage_Production_Optimization", pulp.LpMaximize)
+# 1. Створюємо об'єкт задачі Лінійного Програмування
+# Визначаємо назву задачі та встановлюємо мету – максимізацію (pulp.LpMaximize).
+production_model = pulp.LpProblem("Оптимізація_Виробництва_Напоїв", pulp.LpMaximize)
 
-# 2. Define the decision variables for the quantity of each drink
-# 'lowBound=0' ensures production cannot be negative. 'cat="Continuous"' means
-# the solution can be a fractional number (e.g., 15.5 units).
+# 2. Визначаємо змінні рішення для кількості кожного напою
+# 'lowBound=0' гарантує, що виробництво не може бути від'ємним. 'cat="Continuous"' означає,
+# що рішення може бути дробовим числом (наприклад, 15.5 одиниць).
 lemonade_qty = pulp.LpVariable(
-    "Lemonade_Qty", lowBound=0, cat="Continuous"
-)  # Quantity of Lemonade
+    "Кількість_Лимонаду", lowBound=0, cat="Continuous"
+)  # Кількість Лимонаду
 juice_qty = pulp.LpVariable(
-    "FruitJuice_Qty", lowBound=0, cat="Continuous"
-)  # Quantity of Fruit Juice
+    "Кількість_Фруктового_Соку", lowBound=0, cat="Continuous"
+)  # Кількість Фруктового Соку
 
-# 3. Define the objective function - MAXIMIZE total products
-# The goal is to maximize the sum of the quantities produced.
-production_model += lemonade_qty + juice_qty, "Total_Products_to_Maximize"
+# 3. Визначаємо цільову функцію - МАКСИМІЗУВАТИ загальну кількість продуктів
+# Мета полягає в максимізації суми вироблених кількостей.
+production_model += (
+    lemonade_qty + juice_qty,
+    "Максимізація_Загальної_Кількості_Продуктів",
+)
 
-# 4. Define the resource constraints (Limits on ingredients)
-# The format is: model += (Constraint Expression) <= (Limit), "Constraint Name"
+# 4. Визначаємо обмеження ресурсів (Ліміти на інгредієнти)
+# Формат: model += (Вираз Обмеження) <= (Ліміт), "Назва Обмеження"
 
-# Water constraint: 2 units for Lemonade, 1 unit for Juice. Max available: 100
-production_model += 2 * lemonade_qty + 1 * juice_qty <= 100, "Water_Constraint"
+# Обмеження на воду: 2 одиниці для Лимонаду, 1 одиниця для Соку. Максимум доступно: 100
+production_model += 2 * lemonade_qty + 1 * juice_qty <= 100, "Обмеження_Води"
 
-# Sugar constraint: 1 unit for Lemonade. Max available: 50
-production_model += 1 * lemonade_qty <= 50, "Sugar_Constraint"
+# Обмеження на цукор: 1 одиниця для Лимонаду. Максимум доступно: 50
+production_model += 1 * lemonade_qty <= 50, "Обмеження_Цукру"
 
-# Lemon Juice constraint: 1 unit for Lemonade. Max available: 30
-production_model += 1 * lemonade_qty <= 30, "LemonJuice_Constraint"
+# Обмеження на лимонний сік: 1 одиниця для Лимонаду. Максимум доступно: 30
+production_model += 1 * lemonade_qty <= 30, "Обмеження_Лимонного_Соку"
 
-# Fruit Puree constraint: 2 units for Juice. Max available: 40
-production_model += 2 * juice_qty <= 40, "FruitPuree_Constraint"
+# Обмеження на фруктове пюре: 2 одиниці для Соку. Максимум доступно: 40
+production_model += 2 * juice_qty <= 40, "Обмеження_Фруктового_Пюре"
 
-# 5. Solve the problem
+# 5. Розв'язуємо задачу
 production_model.solve()
 
-# 6. Output the results
-print("--- Linear Programming Optimization Results ---")
+# 6. Виводимо результати
+print("--- Результати ---")
 
-# Print the status of the solver (e.g., Optimal, Infeasible, Unbounded)
-print(f"Solver Status: {pulp.LpStatus[production_model.status]}")
+# Виводимо статус розв'язувача (наприклад, Optimal, Infeasible, Unbounded - Оптимальний, Неможливий, Необмежений)
+print(f"Статус розв'язувача: {pulp.LpStatus[production_model.status]}")
 
-# Print the optimal quantity for each variable
-print(f"Optimal Lemonade Quantity: {pulp.value(lemonade_qty)}")
-print(f"Optimal Fruit Juice Quantity: {pulp.value(juice_qty)}")
+# Виводимо оптимальну кількість для кожної змінної
+print(f"Оптимальна кількість Лимонаду: {pulp.value(lemonade_qty)}")
+print(f"Оптимальна кількість Фруктового Соку: {pulp.value(juice_qty)}")
 
-# Print the value of the objective function at the optimal solution
-print(f"Maximum Total Products: {pulp.value(production_model.objective)}")
+# Виводимо значення цільової функції при оптимальному розв'язанні
+print(f"Максимальна кількість продуктів: {pulp.value(production_model.objective)}")

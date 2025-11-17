@@ -4,35 +4,39 @@ import matplotlib.pyplot as plt
 
 
 def f(x):
-    """The function to be integrated: f(x) = x^2 + 4x - 3"""
+    """Функція для інтегрування: f(x) = x^2 + 4x - 3"""
     return x**2 + x * 4 - 3
 
 
-LOWER_BOUND = 0  # Lower limit of integration (a)
-UPPER_BOUND = 5  # Upper limit of integration (b)
+LOWER_BOUND = 0  # Нижня межа інтегрування (a)
+UPPER_BOUND = 5  # Верхня межа інтегрування (b)
 
 
-## Monte Carlo Integration Function
+## Функція інтегрування методом Монте-Карло
 def mc_integral(a, b, num_samples=10000):
     """
-    Estimates the definite integral using the Monte Carlo method (sampling).
-    It works by finding the ratio of random points under the curve to the total points
-    within a defined bounding box.
+    Оцінює визначений інтеграл за допомогою методу Монте-Карло (вибірка).
+    Працює шляхом знаходження співвідношення випадкових точок під кривою до
+    загальної кількості точок у визначеному обмежувальному прямокутнику.
     """
     max_y = f(b)
 
+    # Генеруємо випадкові координати x рівномірно розподілені між a та b
     x_rand = np.random.uniform(a, b, num_samples)
+    # Генеруємо випадкові координати y рівномірно розподілені між 0 та max_y
     y_rand = np.random.uniform(0, max_y, num_samples)
 
-    # Count how many random points (x, y) satisfy y <= f(x)
+    # Рахуємо, скільки випадкових точок (x, y) задовольняють умову y <= f(x) (тобто знаходяться під кривою)
     points_under_curve = np.sum(y_rand <= f(x_rand))
 
-    # Calculate the ratio of points under the curve to total points
+    # Обчислюємо співвідношення точок під кривою до загальної кількості точок
     area_ratio = points_under_curve / num_samples
 
-    # Estimate the integral (Area under curve)
+    # Оцінюємо інтеграл (Площа під кривою)
+    # Площа обмежувального прямокутника: (b - a) * max_y
     total_area_box = (b - a) * max_y
 
+    # Оцінка інтеграла = Площа прямокутника * Співвідношення площ
     integral_estimate = total_area_box * area_ratio
 
     return integral_estimate
@@ -42,47 +46,47 @@ if __name__ == "__main__":
     a = LOWER_BOUND
     b = UPPER_BOUND
 
-    # Calculate the highly accurate numerical integral using SciPy's quad
+    # Обчислюємо високоточний чисельний інтеграл за допомогою SciPy's quad
     numerical_integral, numerical_error = sci.quad(f, a, b)
     print(
-        f"**SciPy Numerical Integral (Reference):** {numerical_integral:.6f} (Error: {numerical_error:.2e})"
+        f"Інтеграл: {numerical_integral:.6f} (Похибка: {numerical_error:.2e})"
     )
 
-    # Test Monte Carlo integral with varying sample sizes
-    print("\n**Monte Carlo Estimates:**")
+    # Тестуємо інтеграл Монте-Карло з різними розмірами вибірки
+    print("\nОцінки Методом Монте-Карло:")
     monte_carlo_samples = [100, 1000, 10000, 100000, 1000000]
 
     for sample in monte_carlo_samples:
         mc_result = mc_integral(a, b, num_samples=sample)
-        print(f"  MC Integral ({sample:>7,} samples): {mc_result:.6f}")
+        print(f"Інтеграл ({sample:>7,} зразків): {mc_result:.6f}")
 
-    # Plot the function and the integrated area
+    # Будуємо графік функції та інтегрованої області
     x_plot = np.linspace(a - 0.5, b + 0.5, 400)
     y_plot = f(x_plot)
 
     fig, ax = plt.subplots(figsize=(10, 5))
 
-    # Plot the function curve
+    # Будуємо графік функції
     ax.plot(x_plot, y_plot, "r", linewidth=2, label="$f(x) = x^2 + 4x - 3$")
 
-    # Fill the area under the curve between a and b
+    # Заповнюємо область під кривою між a та b
     ix_fill = np.linspace(a, b)
     iy_fill = f(ix_fill)
-    ax.fill_between(ix_fill, iy_fill, color="gray", alpha=0.4, label="Integrated Area")
+    ax.fill_between(
+        ix_fill, iy_fill, color="gray", alpha=0.4, label="Інтегрована Область"
+    )
 
-    # Set plot limits and labels
+    # Встановлюємо межі та мітки осей
     ax.set_xlim([x_plot[0], x_plot[-1]])
-    ax.set_ylim([-5, max(y_plot) + 5])  # Adjusted y-limit for better visualization
+    ax.set_ylim([-5, max(y_plot) + 5])  # Відкоригована межа y для кращої візуалізації
     ax.set_xlabel("x")
     ax.set_ylabel("f(x)")
 
-    # Add vertical lines for the integration bounds
-    ax.axvline(x=a, color="green", linestyle="--", label=f"Lower Bound (a={a})")
-    ax.axvline(x=b, color="blue", linestyle="--", label=f"Upper Bound (b={b})")
+    # Додаємо вертикальні лінії для меж інтегрування
+    ax.axvline(x=a, color="green", linestyle="--", label=f"Нижня Межа (a={a})")
+    ax.axvline(x=b, color="blue", linestyle="--", label=f"Верхня Межа (b={b})")
 
-    ax.set_title(
-        f"Graphical Integration of $f(x) = x^2 + 4x - 3$ from $x={a}$ to $x={b}$"
-    )
+    ax.set_title(f"Графічне Інтегрування $f(x) = x^2 + 4x - 3$ від $x={a}$ до $x={b}$")
     ax.legend()
     plt.grid(True, linestyle="--", alpha=0.6)
     plt.show()
